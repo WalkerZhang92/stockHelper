@@ -1,0 +1,336 @@
+
+{{define "content"}}
+    <!-- Title -->
+    <div class="row heading-bg  bg-red">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h5 class="txt-light">盯盘</h5>
+        </div>
+
+    </div>
+    <!-- /Title -->
+    <div class="col-sm-12">
+    <div class="panel panel-default card-view">
+
+        <!-- 弹出层 -->
+        <div class="modal-dialog modal-dialog-centered alert alert-success" role="alert" style="display: none">
+           操作成功！
+        </div>
+
+        <div class="modal-dialog modal-dialog-centered alert alert-danger" role="alert" style="display: none">
+            操作失败！
+        </div>
+
+        <!-- 模态框触发按钮 -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            添加盯盘提醒
+        </button>
+
+        <!-- 编辑框 -->
+        <div class="modal" id="myModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- 模态框头部 -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">新增盯盘</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- 模态框主体 -->
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default card-view">
+
+                                    <div class="panel-wrapper collapse in">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-xs-12">
+                                                    <div class="form-wrap">
+                                                        <form>
+                                                            <input type="hidden" id = "watch-id" name="watch-id" value="">
+                                                            <div class="form-group">
+                                                                <label class="control-label mb-10" for="exampleInputuname_1">股票代码</label>
+                                                                <div class="input-group">
+                                                                    <div class="input-group-addon"><i class="iconfont icon-bianhao"></i></div>
+                                                                    <input  type="text" class="form-control" id="code-add" name="code-add" placeholder="请输入股票代码" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="control-label mb-10" for="exampleInputEmail_1">股票名称</label>
+                                                                <div class="input-group">
+                                                                    <div class="input-group-addon"><i class="iconfont icon-gupiao2"></i></div>
+                                                                    <input  type="email" class="form-control" id="name-add" name = "name-add" placeholder="请输入股票名称" required>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label class="control-label mb-10">类型</label>
+                                                                <div>
+                                                                    <div class="radio">
+                                                                        <input type="radio" name="type-add" class="radio_1"  value="1" checked>
+                                                                        <label for="radio_1">
+                                                                            按数值通知
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="radio">
+                                                                        <input type="radio" name="type-add" class="radio_2" value="2">
+                                                                        <label for="radio_2">
+                                                                           按涨幅通知
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="control-label mb-10" for="exampleInputEmail_1">最小值</label>
+                                                                <div class="input-group">
+                                                                    <div class="input-group-addon"><i class="iconfont icon-renminbi"></i></div>
+                                                                    <input  type="number" step="0.01" class="form-control" id="min-add" name="min-add" placeholder="输入最小值" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="control-label mb-10" for="exampleInputEmail_1">最大值</label>
+                                                                <div class="input-group">
+                                                                    <div class="input-group-addon"><i class="iconfont icon-renminbi"></i></div>
+                                                                    <input   type="number" step="0.01" class="form-control" id="max-add" name="max-add" placeholder="输入最大值" required>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模态框底部 -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="button" id = "save-form" class="btn btn-primary" onclick="saveWatchStock()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 确认框 -->
+        <div class="modal" id="confirm-delete">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- 模态框头部 -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">确定删除？</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- 模态框主体 -->
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default card-view" style="display: flex; flex-direction: row;gap: 10px;">
+
+                                    <button class="btn btn-info" id="confirm-btn">确定</button>
+                                    <button data-dismiss="modal" class="btn btn-info">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-wrapper collapse in">
+            <div class="panel-body">
+
+                <div class="table-wrap mt-40">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead>
+                            <tr>
+                                <th>股票代码</th>
+                                <th>股票名称</th>
+                                <th>类型</th>
+                                <th>最低预警值</th>
+                                <th>最高预警值</th>
+                                <th class="text-nowrap">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $key, $val := .Stocks}}
+                            <tr>
+
+                                <td>{{.Code}}</td>
+                                <td>{{.Name}}</td>
+                                <td>{{if eq .Type 1}} 按价格操作 {{else}} 按幅度操作 {{end}}</td>
+                                <td>{{.Min}} {{if eq .Type 1}} <span> 元 </span> {{else}} <span> % </span> {{end}}</td>
+                                <td>{{.Max}} {{if eq .Type 1}} <span> 元 </span> {{else}} <span> % </span> {{end}} </td>
+                                <td class="text-nowrap">
+                                    <a href="#" class="mr-25" data-toggle="modal"  data-target="#myModal" onclick="getDetail({{.Id}})" data-original-title="Edit"> <i class="fa fa-pencil text-inverse m-r-10"></i> </a>
+                                    <a href="#" data-toggle="modal" data-target="#confirm-delete" onclick="deletePanel({{.Id}})" data-id = "{{.Id}}" data-original-title="Close"> <i class="fa fa-close text-danger"></i> </a>
+                                </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{{end}}
+
+{{define  "extra-js"}}
+<script type="application/javascript">
+    $(document).ready(function() {
+        // 获取radio和最小值输入框
+        const $radio1 = $('.radio_1');
+        const $radio2 = $('.radio_2');
+        const $minAdd = $('#min-add').prev().find('i');
+        const $maxAdd = $('#max-add').prev().find('i');
+
+        // 监听radio的change事件
+        $radio1.change(function() {
+            $minAdd.removeClass('icon-24gf-percent').addClass('icon-renminbi');
+            $maxAdd.removeClass('icon-24gf-percent').addClass('icon-renminbi');
+        });
+        $radio2.change(function() {
+            $minAdd.removeClass('icon-renminbi').addClass('icon-24gf-percent');
+            $maxAdd.removeClass('icon-renminbi').addClass('icon-24gf-percent');
+        });
+    });
+
+    function  getDetail(id) {
+        // 发送 ajax 请求到后端接口，获取数据
+        $.ajax({
+            url: "http://localhost:8080//watchConfig/detail?id=" + id,
+            type: 'GET', // 请求方式，GET或POST
+            dataType: 'json', // 服务器返回的数据类型，可以是xml、html、script、json、jsonp、text
+            headers: {'Content-Type': 'application/json;charset=utf8'},
+            success: function(data) { // 请求成功时执行的回调函数
+                if (data.code == 200) {
+                    console.log(data)
+                    $('#myModal').modal("show");
+                    // 将获取到的数据填充到表单元素中
+                    $("#code-add").val(data.data.Code);
+                    $("#name-add").val(data.data.Name);
+                    $("#min-add").val(data.data.Min);
+                    $("#max-add").val(data.data.Max);
+                    $("#watch-id").val(data.data.Id);
+                    // 设置类型的选中状态
+                    if (data.data.Type == 1) {
+                        $(".radio_1").prop("checked", true);
+                    } else {
+                        $(".radio_2").prop("checked", true);
+                    }
+                }
+            },
+            error: function(xhr, status, error) { // 请求失败时执行的回调函数
+                console.log(error)
+                $submitBtn.prop('disabled', false);
+            }
+        });
+    };
+
+    function deletePanel(id) {
+        $('#confirm-delete').data('id', id)
+    }
+
+    $('#confirm-btn').on('click', function(e) {
+        e.preventDefault();
+        var id = $('#confirm-delete').data('id');
+        // 调用后端接口进行删除操作
+        $.ajax({
+            url: '/watchConfig/delete',
+            type: 'POST',
+            data: JSON.stringify({id: id}),
+            success: function(data) {
+                // 删除成功，执行相关操作
+                // ...
+                // 关闭弹出框
+                $('#confirm-delete').modal('hide');
+                $('.alert-success').fadeIn();
+
+                setTimeout(function() {
+                    $('.alert-success').fadeOut();
+                    location.reload()
+                }, 2500);
+            },
+            error: function() {
+                // 删除失败，执行相关操作
+                // ...
+                // 关闭弹出框
+                $('#confirm-delete').modal('hide');
+            }
+        });
+    });
+</script>
+<script type="application/javascript">
+
+    function saveWatchStock() {
+        const $submitBtn = $('#save-form');
+
+        if ($submitBtn.prop('disabled')) {
+            return;
+        }
+
+        // 禁用提交按钮
+        $submitBtn.prop('disabled', true);
+
+
+        var code = $("#code-add").val()
+        var name = $("#name-add").val()
+        var type = $('input[name="type-add"]').val()
+        var min  = $("#min-add").val()
+        var max  = $("#max-add").val()
+        var id   = $("#watch-id").val()
+
+        $.ajax({
+            url: "/saveWatchStock",
+            type: 'POST', // 请求方式，GET或POST
+            data: JSON.stringify({"Code": code, "Name" : name, "Type" : type, "Min" : min, "Max" : max, "Id" : parseInt(id)}), // 请求参数，可以是对象、字符串或序列化的表单数据
+            dataType: 'json', // 服务器返回的数据类型，可以是xml、html、script、json、jsonp、text
+            headers: {'Content-Type': 'application/json;charset=utf8'},
+            success: function(data) { // 请求成功时执行的回调函数
+                console.log(data)
+                if (data.code == 200) {
+                    $('#myModal').modal("hide");
+                    $('.alert-success').fadeIn();
+
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut();
+                        location.reload()
+                    }, 2500);
+                } else {
+                    $('#myModal').modal("hide");
+                    $('.alert-danger').fadeIn();
+
+                    setTimeout(function() {
+                        $('.alert-danger').fadeOut();
+                        location.reload()
+                    }, 2500);
+                }
+
+                $submitBtn.prop('disabled', false);
+            },
+            error: function(xhr, status, error) { // 请求失败时执行的回调函数
+                console.log(error)
+                alert("提交失败")
+                $submitBtn.prop('disabled', false);
+            }
+        });
+    }
+</script>
+{{end}}
+
+{{template "partials/main.html" .}}
+
+
+

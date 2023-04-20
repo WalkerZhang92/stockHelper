@@ -1,0 +1,29 @@
+@font-face {
+  font-family: "iconfont"; /* Project id  */
+  src: url('../font/iconfont.ttf?t=1681717128520') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gupiao2:before {
+  content: "\e665";
+}
+
+.icon-renminbi:before {
+  content: "\eb1e";
+}
+
+.icon-24gf-percent:before {
+  content: "\e891";
+}
+
+.icon-bianhao:before {
+  content: "\e696";
+}
+

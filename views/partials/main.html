@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <meta name="keywords" content="{{.Keywords}}">
+
+    {{template "partials/common-css.html" .}}
+
+</head>
+
+<body>
+<!-- Preloader -->
+<div class="preloader-it">
+    <div class="la-anim-1"></div>
+</div>
+<!-- /Preloader -->
+<div class="wrapper">
+    <!-- Top Menu Items -->
+    {{template "partials/top-menu.html" .}}
+    <!-- /Top Menu Items -->
+
+    <!-- Left Sidebar Menu -->
+    {{template "partials/left-sider-menu.html" .}}
+    <!-- /Left Sidebar Menu -->
+
+    <!-- Right Sidebar Menu -->
+    {{template "partials/right-sider-menu.html" .}}
+    <!-- /Right Sidebar Menu -->
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        {{template "content" .}}
+        <!-- Footer -->
+        {{template "partials/footer.html" .}}
+        <!-- /Footer -->
+
+    </div>
+    <!-- /Main Content -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- JavaScript -->
+{{template "partials/common-js.html" .}}
+
+
+<!-- Init JavaScript -->
+<script src="../static/js/init.js"></script>
+<script src="../static/js/dashboard-data.js"></script>
+{{template "extra-js" .}}
+</body>
+
+</html>

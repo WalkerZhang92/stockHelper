@@ -1,0 +1,423 @@
+{{define "content"}}
+
+    <div class="container-fluid">
+
+        <!-- Title -->
+        <div class="row heading-bg  bg-red">
+            <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                <h5 class="txt-light">analytical</h5>
+            </div>
+            <!-- Breadcrumb -->
+            <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                <ol class="breadcrumb">
+                    <li><a href="">Dashboard</a></li>
+                    <li><a href="#"><span>dashboard</span></a></li>
+                    <li class="active"><span>analytical</span></li>
+                </ol>
+            </div>
+            <!-- /Breadcrumb -->
+        </div>
+        <!-- /Title -->
+
+        <!-- Row -->
+        <div class="row  bg-light" style="height: 50px">
+            <div class="col-lg-3 col-md-4 col-sm-2 col-xs-12" style="height: 100%; line-height: 50px; text-align: center; font-size: 18px">
+                <span class="txt-dark">{{.Code}}</span>
+                <span class="txt-dark">{{.Name}}</span>
+            </div>
+            <div class="input-group col-lg-3 col-md-4 col-sm-2 col-xs-12" style="line-height: 50px;display: flex;align-items: center;float: right">
+                <input type="text" onkeyup="searchStock()" id="stock-search" name="example-input1-group4" class="form-control" placeholder="请输入股票代码或者名称" style="width: 80%"><span class="input-group-btn">
+														<button type="button" class="btn  btn-danger"><i class="fa fa-search"></i></button>
+														</span>
+            </div>
+        </div>
+        <!-- /Row -->
+
+        <div id = "search-panel" class="panel-wrapper collapse in bg-info hidden" style="width: 25%; position: absolute; right: 30px; z-index: 100">
+            <div class="panel-body">
+                <div class="table-wrap mt-40">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <tbody id="search-content">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Row -->
+        <div id="container" style="height: 600px"></div>
+        <!-- Row -->
+    </div>
+
+{{end}}
+
+{{define  "extra-js"}}
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+
+    <script type="text/javascript">
+        var dom = document.getElementById('container');
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+        var app = {};
+        var ROOT_PATH = 'https://echarts.apache.org/examples';
+        var option;
+
+        const upColor = '#ec0000';
+        const downColor = '#00da3c';
+        var currentData;
+        function splitData(rawData) {
+            let categoryData = [];
+            let values = [];
+            let volumes = [];
+            for (let i = 0; i < rawData.length; i++) {
+
+                categoryData.push(rawData[i].split(",").splice(0, 1)[0]);
+                currentData = rawData[i].split(",")
+                currentData.shift()
+                currentData = currentData.map(Number)
+                values.push(currentData);
+                //volumes.push([i, rawData[i][4], rawData[i][0] > rawData[i][1] ? 1 : -1]);
+                volumes.push([i, currentData[4], currentData[0] > currentData[1] ? -1 : 1]);
+            }
+            return {
+                categoryData: categoryData,
+                values: values,
+                volumes: volumes
+            };
+        }
+        function calculateMA(dayCount, data) {
+            var result = [];
+
+            for (var i = 0, len = data.values.length; i < len; i++) {
+                if (i < dayCount) {
+                    result.push('-');
+                    continue;
+                }
+                var sum = 0;
+                for (var j = 0; j < dayCount; j++) {
+                    sum += data.values[i - j][1];
+                }
+                result.push(+(sum / dayCount).toFixed(3));
+            }
+            return result;
+        }
+
+        /**  获取默认初始和结束显示日期 **/
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        const currentDate = new Date();
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(currentDate.getFullYear() - 1);
+        /**  获取默认初始和结束显示日期 **/
+
+
+        var data = splitData({{.Klines}});
+        console.log(data)
+        myChart.setOption(
+            (option = {
+                animation: false,
+                legend: {
+                    bottom: 10,
+                    left: 'center',
+                    data: ['道琼斯指数', 'MA5', 'MA10', 'MA20', 'MA30']
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    },
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                    padding: 10,
+                    textStyle: {
+                        color: '#000'
+                    },
+                    position: function (pos, params, el, elRect, size) {
+                        const obj = {
+                            top: 10
+                        };
+                        obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+                        return obj;
+                    },
+                    formatter: function (param) {
+                        param = param[0];
+                        return [
+                            '日期: ' + param.name + '<hr size=1 style="margin: 3px 0">',
+                            '开盘价: ' + param.data[1] + '<br/>',
+                            '收盘价: ' + param.data[2] + '<br/>',
+                            '最高价: ' + param.data[3] + '<br/>',
+                            '最低价: ' + param.data[4] + '<br/>'
+                        ].join('');
+                    }
+
+                    // extraCssText: 'width: 170px'
+                },
+                axisPointer: {
+                    link: [
+                        {
+                            xAxisIndex: 'all'
+                        }
+                    ],
+                    label: {
+                        backgroundColor: '#777'
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: false
+                        },
+                        brush: {
+                            type: ['lineX', 'clear']
+                        }
+                    }
+                },
+                brush: {
+                    xAxisIndex: 'all',
+                    brushLink: 'all',
+                    outOfBrush: {
+                        colorAlpha: 0.1
+                    }
+                },
+                visualMap: {
+                    show: false,
+                    seriesIndex: 5,
+                    dimension: 2,
+                    pieces: [
+                        {
+                            value: 1,
+                            color: upColor
+                        },
+                        {
+                            value: -1,
+                            color: downColor
+                        }
+                    ]
+                },
+                grid: [
+                    {
+                        left: '10%',
+                        right: '8%',
+                        height: '50%'
+                    },
+                    {
+                        left: '10%',
+                        right: '8%',
+                        top: '63%',
+                        height: '16%'
+                    }
+                ],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: data.categoryData,
+                        boundaryGap: false,
+                        axisLine: { onZero: false },
+                        splitLine: { show: false },
+                        min: 'dataMin',
+                        max: 'dataMax',
+                        axisPointer: {
+                            z: 100
+                        }
+                    },
+                    {
+                        type: 'category',
+                        gridIndex: 1,
+                        data: data.categoryData,
+                        boundaryGap: false,
+                        axisLine: { onZero: false },
+                        axisTick: { show: false },
+                        splitLine: { show: false },
+                        axisLabel: { show: false },
+                        min: 'dataMin',
+                        max: 'dataMax'
+                    }
+                ],
+                yAxis: [
+                    {
+                        scale: true,
+                        splitArea: {
+                            show: true
+                        }
+                    },
+                    {
+                        scale: true,
+                        gridIndex: 1,
+                        splitNumber: 2,
+                        axisLabel: { show: false },
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        splitLine: { show: false }
+                    }
+                ],
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0, 1],
+                        start: 96,
+                        end: 100
+                    },
+                    {
+                        show: true,
+                        xAxisIndex: [0, 1],
+                        type: 'slider',
+                        top: '85%',
+                        start: 96,
+                        end: 100
+                    }
+                ],
+                series: [
+                    {
+                        name: '道琼斯指数',
+                        type: 'candlestick',
+                        data: data.values,
+                        itemStyle: {
+                            color: upColor,
+                            color0: downColor,
+                            borderColor: undefined,
+                            borderColor0: undefined
+                        },
+                        tooltip: {
+                            formatter: function (param) {
+                                param = param[0];
+                                return [
+                                    '日期: ' + param.name + '<hr size=1 style="margin: 3px 0">',
+                                    '开盘价: ' + param.data[0] + '<br/>',
+                                    '收盘价: ' + param.data[1] + '<br/>',
+                                    '最高价: ' + param.data[2] + '<br/>',
+                                    '最低价: ' + param.data[3] + '<br/>'
+                                ].join('');
+                            }
+                        }
+                    },
+                    {
+                        name: 'MA5',
+                        type: 'line',
+                        data: calculateMA(5, data),
+                        smooth: true,
+                        lineStyle: {
+                            opacity: 0.5
+                        }
+                    },
+                    {
+                        name: 'MA10',
+                        type: 'line',
+                        data: calculateMA(10, data),
+                        smooth: true,
+                        lineStyle: {
+                            opacity: 0.5
+                        }
+                    },
+                    {
+                        name: 'MA20',
+                        type: 'line',
+                        data: calculateMA(20, data),
+                        smooth: true,
+                        lineStyle: {
+                            opacity: 0.5
+                        }
+                    },
+                    {
+                        name: 'MA30',
+                        type: 'line',
+                        data: calculateMA(30, data),
+                        smooth: true,
+                        lineStyle: {
+                            opacity: 0.5
+                        }
+                    },
+                    {
+                        name: '交易量',
+                        type: 'bar',
+                        xAxisIndex: 1,
+                        yAxisIndex: 1,
+                        data: data.volumes
+                    }
+                ]
+            }),
+            true
+        );
+        myChart.dispatchAction({
+            type: 'brush',
+            areas: [
+                {
+                    brushType: 'lineX',
+                    coordRange: [formatDate(currentDate), formatDate(oneYearAgo)],
+                    xAxisIndex: 0
+                }
+            ]
+        });
+
+        if (option && typeof option === 'object') {
+            myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+
+
+
+    </script>
+
+    <script type="application/javascript">
+        var stockSearch = $("#stock-search")
+        var searchPanel = $("#search-panel")
+        var searchContent =  $("#search-content")
+        stockSearch.focus(function() {
+            searchPanel.removeClass("hidden")
+        });
+        stockSearch.blur(function() {
+            $("#search-panel").mouseover(function () {
+                searchPanel.addClass("hidden")
+            });
+        });
+        function searchStock() {
+            var input = stockSearch.val();
+            var html
+
+            $.ajax({
+                url: "http://localhost:8080/searchStock",
+                type: 'POST', // 请求方式，GET或POST
+                data: JSON.stringify({"input": input}), // 请求参数，可以是对象、字符串或序列化的表单数据
+                dataType: 'json', // 服务器返回的数据类型，可以是xml、html、script、json、jsonp、text
+                headers: {'Content-Type': 'application/json;charset=utf8'},
+                success: function(data) { // 请求成功时执行的回调函数
+                    var list = data.GubaCodeTable.Data
+                    if (list !== null) {
+                        $.each(list, function(index, value){
+                            var str = "\n" +
+                                "<tr>\n" +
+
+                                "<td>" + "<a style=' cursor:pointer;'  href = 'http://localhost:8080/index?secid=" + value.RelatedCode  +"'>\n"  + value.RelatedCode + "</a>\n" + "</td>\n" +
+                                "<td>" + value.ShortName + "</td>\n" +
+                                "<td>" + value.HeadCharacter + "</td>\n" +
+
+                                "</tr>\n"
+                            if ( typeof str !== "undefined") {
+                                html += str
+                            }
+                        });
+                        console.log(html)
+                        searchContent.html(html);
+                    }
+
+                },
+                error: function(xhr, status, error) { // 请求失败时执行的回调函数
+                    console.log('请求失败：' + status + ' ' + error); // 在控制台中输出失败信息
+                }
+            });
+        }
+
+    </script>
+{{end}}
+
+{{template "partials/main.html" .}}

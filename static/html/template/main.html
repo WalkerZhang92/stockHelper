@@ -1,0 +1,60 @@
+{{define "main"}}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <meta name="keywords" content="{{.Keywords}}">
+
+    {{template "common-css"}}
+
+</head>
+
+<body>
+<!-- Preloader -->
+<div class="preloader-it">
+    <div class="la-anim-1"></div>
+</div>
+<!-- /Preloader -->
+<div class="wrapper">
+    <!-- Top Menu Items -->
+    {{template "top-menu"}}
+    <!-- /Top Menu Items -->
+
+    <!-- Left Sidebar Menu -->
+    {{template "left-sider-menu"}}
+    <!-- /Left Sidebar Menu -->
+
+    <!-- Right Sidebar Menu -->
+    {{template "right-sider-menu"}}
+    <!-- /Right Sidebar Menu -->
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        {{template "content"}}
+        <!-- Footer -->
+        {{template "footer"}}
+        <!-- /Footer -->
+
+    </div>
+    <!-- /Main Content -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- JavaScript -->
+
+{{template "common-js"}}
+
+<!-- Init JavaScript -->
+<script src="../static/js/init.js"></script>
+<script src="../static/js/dashboard-data.js"></script>
+
+</body>
+
+</html>
+
+{{end}}
