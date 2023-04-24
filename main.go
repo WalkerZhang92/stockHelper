@@ -12,9 +12,11 @@ import (
 
 func init() {
 
+	databasename := beego.AppConfig.String("DB_DATABASE")
+	password := beego.AppConfig.String("DB_PASSWORD")
 	//数据库连接
 	orm.RegisterDriver("mysql", orm.DRMySQL)
-	orm.RegisterDataBase("default", "mysql", "root:root@/stockmarket?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "root:" + password + "@/" + databasename + "?charset=utf8")
 
 	//初始化定时任务
 	tasks.StartCron()
