@@ -1,3 +1,6 @@
 /.idea
 /conf
 /static/html
+go.mod
+go.sum
+.env
