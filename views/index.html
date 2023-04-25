@@ -385,7 +385,7 @@
             var html
 
             $.ajax({
-                url: "http://localhost:8080/searchStock",
+                url: "/searchStock",
                 type: 'POST', // 请求方式，GET或POST
                 data: JSON.stringify({"input": input}), // 请求参数，可以是对象、字符串或序列化的表单数据
                 dataType: 'json', // 服务器返回的数据类型，可以是xml、html、script、json、jsonp、text

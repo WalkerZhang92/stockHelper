@@ -210,7 +210,7 @@
     function  getDetail(id) {
         // 发送 ajax 请求到后端接口，获取数据
         $.ajax({
-            url: "http://localhost:8080//watchConfig/detail?id=" + id,
+            url: "/watchConfig/detail?id=" + id,
             type: 'GET', // 请求方式，GET或POST
             dataType: 'json', // 服务器返回的数据类型，可以是xml、html、script、json、jsonp、text
             headers: {'Content-Type': 'application/json;charset=utf8'},
