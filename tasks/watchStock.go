@@ -49,7 +49,7 @@ func WatchStock() {
 	client := http.Client{
 		Timeout: 600 * time.Second,
 	}
-	url := "https://27.push2.eastmoney.com/api/qt/ulist/sse?invt=3&pi=0&pz=" + pageSize + "&mpi=2000&secids=" + secidAllStr + "&ut=6d2ffaa6a585d612eda28417681d58fb&fields=f2,f3,f12,f14,f30,f31,f32&po=1"
+	url := "https://27.push2.eastmoney.com/api/qt/ulist/sse?invt=3&pi=0&pz=10&mpi=2000&secids=" + secidAllStr + "&ut=6d2ffaa6a585d612eda28417681d58fb&fields=f2,f3,f12,f14,f30,f31,f32&po=1"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		beego.Error(err)
