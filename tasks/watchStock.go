@@ -18,7 +18,6 @@ import (
 
 func WatchStock() {
 	var stocks []*models.WatchStock
-	pageSize := "10"
 	o := orm.NewOrm()
 	num, err := o.QueryTable("WatchStock").Filter("is_del", 0).All(&stocks)
 	fmt.Printf("Returned Rows Num: %s, %s", num, err)
