@@ -383,6 +383,17 @@
         function searchStock() {
             var input = stockSearch.val();
             var html
+            var currentUrl = window.location.href;
+            console.log(currentUrl); // 输出当前页面的完整地址
+
+            var parser = document.createElement('a');
+            parser.href = currentUrl;
+
+            var domain = parser.hostname;
+            console.log(domain); // 输出当前页面的域名
+
+            var port = parser.port;
+            console.log(port); // 输出当前页面的端口号
 
             $.ajax({
                 url: "/searchStock",
@@ -397,7 +408,7 @@
                             var str = "\n" +
                                 "<tr>\n" +
 
-                                "<td>" + "<a style=' cursor:pointer;'  href = 'http://localhost:8080/index?secid=" + value.RelatedCode  +"'>\n"  + value.RelatedCode + "</a>\n" + "</td>\n" +
+                                "<td>" + "<a style=' cursor:pointer;'  href = '/index?secid=" + value.RelatedCode  +"'>\n"  + value.RelatedCode + "</a>\n" + "</td>\n" +
                                 "<td>" + value.ShortName + "</td>\n" +
                                 "<td>" + value.HeadCharacter + "</td>\n" +
 
