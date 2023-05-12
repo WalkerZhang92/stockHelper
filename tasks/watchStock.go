@@ -87,7 +87,7 @@ func WatchStock() {
 				code := eachDiff.(map[string]interface{})["f12"] // f12 股票代码
 				if currentStockPrice, ok := eachDiff.(map[string]interface{})["f2"]; ok {
 					for _, stock := range stocks {
-						if code == stock.Code && stock.Type == 1 {
+						if code == stock.Code && stock.Type == 1 && currentStockPrice != nil{
 							if currentStockPrice.(float64)/100 < stock.Min {
 								// 在需要时使用redisService执行Redis命令
 								keyString := stock.Code + "_min"
@@ -117,7 +117,7 @@ func WatchStock() {
 				}
 				if currentPercentage, ok := eachDiff.(map[string]interface{})["f3"]; ok {
 					for _, stock := range stocks {
-						if code == stock.Code && stock.Type == 2 {
+						if code == stock.Code && stock.Type == 2 && currentPercentage != nil {
 							if currentPercentage.(float64)/100 < stock.Min {
 								keyString := stock.Code + "_min"
 								result, _ := redisService.Do("GET", keyString)
