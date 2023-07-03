@@ -18,6 +18,14 @@ func StartCron() {
 		return
 	}
 
+	_, err = c.AddFunc("0 16 * * 1-5", func() {
+		go SaveSectorFLow()
+	})
+	if err != nil {
+		fmt.Println("Failed to add cron job:", err)
+		return
+	}
+
 	// 启动定时任务调度器
 	c.Start()
 	fmt.Println("Cron job started.")

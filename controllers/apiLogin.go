@@ -126,137 +126,83 @@ func (this *ApiLoginController) Recommend() {
 	this.ServeJSON()
 }
 
-func (c *ApiLoginController) StockRealTime() {
-	var stocks []*models.WatchStock
-	pageSize := "10"
-	o := orm.NewOrm()
-	num, err := o.QueryTable("WatchStock").Filter("is_del", 0).All(&stocks)
-	fmt.Printf("Returned Rows Num: %s, %s", num, err)
-	redisService := services.NewRedisService()
-	defer redisService.Close()
-
-	var secidAllStr string
-	var secidStr string
-	for index, stock := range stocks {
-		firstStr := string(stock.Code[0])
-
-		switch firstStr {
-		case "6":
-			secidStr = "1." + string(stock.Code)
-		default:
-			secidStr = "0." + string(stock.Code)
-		}
-		if num >= 1 {
-			if index+1 == int(num) {
-				secidAllStr += secidStr
-			} else {
-				secidAllStr += secidStr + ","
-			}
-
-		}
-
-	}
-	client := http.Client{
-		Timeout: 18000 * time.Second,
-	}
-	url := "https://27.push2.eastmoney.com/api/qt/ulist/sse?invt=3&pi=0&pz=" + pageSize + "&mpi=2000&secids=" + secidAllStr + "&ut=6d2ffaa6a585d612eda28417681d58fb&fields=f2,f3,f12,f14,f30,f31,f32&po=1"
-	req, err := http.NewRequest("GET", url, nil)
+func (this *ApiLoginController) SaveSectorFlow()  {
+	url := "https://push2.eastmoney.com/api/qt/clist/get?fid=f62&po=1&pz=500&pn=1&np=1&fltt=2&invt=2&fs=m:90+t:2&fields=f12,f14,f2,f3,f62,f184,f66,f69,f72,f75,f78,f81,f84,f87,f204,f205,f124,f1,f13"
+	resp, err := http.Get(url)
 	if err != nil {
-		beego.Error(err)
+		this.Data["json"] = &models.Response{Code: 401, Message: err.Error()}
+		this.ServeJSON()
 		return
 	}
-
-	req.Header.Set("Accept", "text/event-stream")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		beego.Error(err)
-		return
-	}
-
 	defer resp.Body.Close()
-
-	for {
-		event, err := common.ReadEvent(resp.Body)
-		if err != nil {
-			beego.Error(err)
-			return
-		}
-
-		// 根据 event 做不同的处理
-		beego.Info(event)
-		var eventJson map[string]interface{}
-		err = json.Unmarshal([]byte(event), &eventJson)
-		if err != nil {
-			beego.Error("Failed to parse JSON string:", err)
-			return
-		}
-		if eventJson["data"] != nil {
-			var data = eventJson["data"].(map[string]interface{})
-			var diff = data["diff"].(map[string]interface{})
-			for _, eachDiff := range diff {
-				code := eachDiff.(map[string]interface{})["f12"] // f12 股票代码
-				if currentStockPrice, ok := eachDiff.(map[string]interface{})["f2"]; ok {
-					for _, stock := range stocks {
-						if code == stock.Code && stock.Type == 1 {
-							if currentStockPrice.(float64)/100 < stock.Min {
-								// 在需要时使用redisService执行Redis命令
-								keyString := stock.Code + "_min"
-								result, _ := redisService.Do("GET", keyString)
-								if result != nil {
-									continue
-								} else {
-									services.SendDingMsg("股票提醒: " + stock.Code + " " + stock.Name + " 当前股价" + strconv.FormatFloat(currentStockPrice.(float64)/100, 'f', -1, 64) + " 已经低于最低设定值，是否考虑割肉？")
-									result, err = redisService.Do("SET", keyString, 1)
-									result, _ = redisService.Do("EXPIRE", keyString, 600)
-								}
-
-							}
-							if currentStockPrice.(float64)/100 > stock.Max {
-								keyString := stock.Code + "_max"
-								result, _ := redisService.Do("GET", keyString)
-								if result != nil {
-									continue
-								} else {
-									services.SendDingMsg("股票提醒: " + stock.Code + " " + stock.Name + " 当前股价" + strconv.FormatFloat(currentStockPrice.(float64)/100, 'f', -1, 64) + " 已经高于最高设定值，是否考虑小赚一波？")
-									result, _ = redisService.Do("SET", keyString, 1)
-									result, _ = redisService.Do("EXPIRE", keyString, 600)
-								}
-							}
-						}
-					}
-				}
-				if currentPercentage, ok := eachDiff.(map[string]interface{})["f3"]; ok {
-					for _, stock := range stocks {
-						if code == stock.Code && stock.Type == 2 {
-							if currentPercentage.(float64)/100 < stock.Min {
-								keyString := stock.Code + "_min"
-								result, _ := redisService.Do("GET", keyString)
-								if result != nil {
-									continue
-								} else {
-									services.SendDingMsg("股票提醒: " + stock.Code + " " + stock.Name + " 当前跌幅" + strconv.FormatFloat(currentPercentage.(float64)/100, 'f', -1, 64) + " 已经低于最低设定值，是否考虑割肉？")
-									result, err = redisService.Do("SET", keyString, 1)
-									result, err = redisService.Do("EXPIRE", keyString, 600)
-								}
-							}
-							if currentPercentage.(float64)/100 > stock.Max {
-								keyString := stock.Code + "_max"
-								result, _ := redisService.Do("GET", keyString)
-								if result != nil {
-									continue
-								} else {
-									services.SendDingMsg("股票提醒: " + stock.Code + " " + stock.Name + " 当前涨幅" + strconv.FormatFloat(currentPercentage.(float64)/100, 'f', -1, 64) + " 已经高于最高设定值，是否考虑小赚一波？")
-									result, _ = redisService.Do("SET", keyString, 1)
-									result, _ = redisService.Do("EXPIRE", keyString, 600)
-								}
-							}
-						}
-					}
-				}
-
-			}
-		}
-
+	var data map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	result := data["data"]
+	if err != nil {
+		this.Data["json"] = &models.Response{Code: 401, Message: err.Error()}
+		this.ServeJSON()
+		return
 	}
+	diff := result.(map[string]interface{})["diff"].([]interface{})
+	fmt.Println(diff)
+	now := time.Now()
+	dateFormat := "20060102"
+	dateString := now.Format(dateFormat)
+	o := orm.NewOrm()
+
+	for _, item := range diff {
+		sectorFlow := &models.SectorFlow{}
+		sector := item.(map[string]interface{})
+		//板块编码
+		if _, ok := sector["f12"].(string); !ok {
+			sectorFlow.SectorCode = ""
+		} else {
+			sectorFlow.SectorCode = sector["f12"].(string)
+		}
+
+		//板块名称
+		if _, ok := sector["f14"].(string); !ok {
+			sectorFlow.SectorName = ""
+		} else {
+			sectorFlow.SectorName = sector["f14"].(string)
+		}
+
+		//流入最多的股
+		if _, ok := sector["f205"].(string); !ok {
+			sectorFlow.BestStock = ""
+		} else {
+			sectorFlow.BestStock = sector["f205"].(string)
+		}
+		//流入最多的股名称
+		if _, ok := sector["f204"].(string); !ok {
+			sectorFlow.BestStockName = ""
+		} else {
+			sectorFlow.BestStockName = sector["f204"].(string)
+		}
+
+		//流入金额
+		if _, ok := sector["f62"]; !ok {
+			sectorFlow.FlowIn = 0
+		} else {
+			sectorFlow.FlowIn = sector["f62"].(float64)
+		}
+		num, _ := strconv.Atoi(dateString)
+		sectorFlow.Date = num
+
+		newId, err := o.Insert(sectorFlow)
+		fmt.Println(newId)
+		if err == nil {
+			this.Data["json"] = &models.Response{Code: 200, Message: "插入成功"}
+			this.ServeJSON()
+		} else {
+			fmt.Println(err)
+			this.Data["json"] = &models.Response{Code: 500, Message: "插入失败"}
+			this.ServeJSON()
+		}
+	}
+
+	// 将数据作为 JSON 响应发送回客户端
+	this.Data["json"] = &data
+
+	this.ServeJSON()
 }

@@ -21,7 +21,7 @@ func init() {
 
 	beego.Router("/login/task", &controllers.ApiLoginController{}, "post:Task")
 	beego.Router("/login/recommend", &controllers.ApiLoginController{}, "post:Recommend")
-	beego.Router("/login/stockRealTime", &controllers.ApiLoginController{}, "post:StockRealTime")
+	beego.Router("/login/saveSector", &controllers.ApiLoginController{}, "post:SaveSectorFlow")
 
 	beego.Router("/searchStock", &controllers.ApiSearchStockController{}, "post:SearchStock")
 

@@ -47,11 +47,26 @@ type WatchStock struct {
 	IsDel int8 `json:"is_del"`
 }
 
+type SectorFlow struct {
+	Id int
+	SectorCode string
+	SectorName string
+	BestStock string
+	BestStockName string
+	FlowIn float64
+	Date int
+	IsDel int8 `json:"is_del"`
+}
+
 func (o *WatchStock) TableName() string {
 	return "watch_stock"
 }
 
+func (o *SectorFlow) TableName() string {
+	return "sector_flow"
+}
+
 func init() {
 	// 需要在init中注册定义的model
-	orm.RegisterModel(new(User), new(Stock), new(StockSelect), new(WatchStock))
+	orm.RegisterModel(new(User), new(Stock), new(StockSelect), new(WatchStock), new(SectorFlow))
 }
